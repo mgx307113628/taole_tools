@@ -12,8 +12,8 @@ from functions import *
 def main():
 	print "手动导表:"
 	lst = []
-	for idx, d in enumerate(MAKEPY_DIRS):
-		lst.append("%d.御剑%s"%(idx+1, d.split("/")[-1]))
+	for i, d in enumerate(MAKEPY_DIRS):
+		lst.append("%d.%s"%(i+1, d[0]))
 	hint = "\t".join(lst)+"\nChose Work Directory: "
 	while True:
 		input_s = raw_input(hint)
@@ -28,7 +28,7 @@ def main():
 		if idx > len(MAKEPY_DIRS) or idx <= 0:
 			print "Wrong input!!!!!"
 			continue
-		workdir = MAKEPY_DIRS[idx-1]
+		name, workdir, _ = MAKEPY_DIRS[idx-1]
 		break
 	os.chdir(workdir)
 	

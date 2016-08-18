@@ -7,18 +7,13 @@ GENFILE_PATH = "E:/tools/genfiletags.sh"
 
 PATH_ROOT = "E:/yujian/"
 
-
 MAKEPY_DIRS = [
-	"E:/yujian/a导表/策划导表",
-	"E:/yujian/a导表/体服导表",
-	"E:/yujian/a导表/全服导表",
+	["御剑策划",	"E:/yujian/a导表/策划导表",	"E:/yujian/ready/",],
+	["御剑体服",	"E:/yujian/a导表/体服导表",	"E:/yujian/trunk/",],
+	["御剑全服",	"E:/yujian/a导表/全服导表",	"E:/yujian/trial/",],
+	["手游策划",	"E:/pisces/策划导表",		"",],
+	["手游体服",	"E:/pisces/策划体服",		"",],
 ]
-
-AUTO_MAKE_DIRS = {
-	"E:/yujian/a导表/策划导表" : "E:/yujian/ready/",
-	"E:/yujian/a导表/体服导表" : "E:/yujian/trunk/",
-	"E:/yujian/a导表/全服导表" : "E:/yujian/trial/",
-}
 
 EXCLUDE_NAME = [		#排除的文件
 	"tags",
