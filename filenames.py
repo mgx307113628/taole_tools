@@ -20,7 +20,7 @@ def GenerateFileTags(dirs):
 		print "Generate %s !"%fname
 
 def main():
-	dirs = ReadInputDirs("Enter Directories: ")
+	dirs = ReadInputDirs("Generate File Names!! Enter Directories: ")
 	if dirs is None:
 		return
 	GenerateFileTags(dirs)

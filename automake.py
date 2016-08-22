@@ -43,7 +43,7 @@ def main():
 				print "Wrong input!!!!!"
 				wrong = True
 				break
-			if idx > len(MAKEPY_DIRS) or idx <= 0 or MAKEPY_DIRS[idx-1][2] != "":
+			if idx > len(MAKEPY_DIRS) or idx <= 0 or MAKEPY_DIRS[idx-1][2] == "":
 				print "Wrong input!!!!!"
 				wrong = True
 				break

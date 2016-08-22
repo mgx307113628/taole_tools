@@ -27,7 +27,7 @@ def DoGenTags(dset):
 		trd.join()
 
 def main():
-	dirs = ReadInputDirs("Enter Directories: ")
+	dirs = ReadInputDirs("tags file !!Enter Directories: ")
 	if dirs is None:
 		return
 	DoGenTags(dirs)
