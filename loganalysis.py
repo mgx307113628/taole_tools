@@ -8,7 +8,7 @@ REMOTE_PATH = "\\\\192.168.1.26\\guest\\yjlog\\"
 LOCAL_PATH = "E:/log/"
 
 PROGRESS_FILE = "progress.txt"
-BUGS_FILE = "bugs.txt"
+BUGS_FILE = "bugs.py"
 
 BUG_HEAD = " Object<"	# " object<"]
 BUG_CONTENT = [" File 'script/", " <type 'except"]

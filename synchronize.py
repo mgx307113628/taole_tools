@@ -14,7 +14,7 @@ from functions import *
 
 def Synchronize():
 	#ԴĿ¼
-	dset = ReadInputDirs("Chose Source Dir: ", maxnum=1)
+	dset = ReadInputDirs("Synchronize Code\nChose Source Dir: ", maxnum=1)
 	if dset is None:
 		return
 	source = list(dset)[0]

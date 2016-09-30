@@ -96,8 +96,10 @@ def DoDaoBiao(workdir, dst):
 	SVNUpdate(workdir)
 	clst,alst,rlst,dlst,mlst = SVNStatus(workdir)
 	rvts = clst+rlst+dlst+mlst
-	if rvts and SVNRevert(rvts) != 0:
-		raise SVNException("%s revert error !!!"%workdir)
+	if rvts:
+		raise SVNException("%s NOT Equal Repository !!!"%workdir)
+	#if rvts and SVNRevert(rvts) != 0:
+	#	raise SVNException("%s revert error !!!"%workdir)
 	
 	SVNUpdate(dst)
 	if SVNIsModified(dst):

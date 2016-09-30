@@ -17,7 +17,7 @@ class CGenTags(threading.Thread):
 
 def DoGenTags(dset):
 	for d in dset:
-		print d+"\\tags......"
+		print d+"/tags......"
 	threadlist = []
 	for d in dset:
 		trd = CGenTags(d)
