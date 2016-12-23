@@ -3,8 +3,10 @@
 import os
 import shutil
 import time
+import datetime
 
-REMOTE_PATH = "\\\\192.168.1.26\\guest\\yjlog\\"
+#REMOTE_PATH = "\\\\192.168.1.26\\guest\\yjlog\\"
+REMOTE_PATH = "\\\\192.168.1.26\\guest\\th2log\\"
 LOCAL_PATH = "E:/log/"
 
 PROGRESS_FILE = "progress.txt"
@@ -16,13 +18,17 @@ BUG_TAIL = " etype <type '"
 
 ANALYSIS_INTERVAL = 3600
 
+GEN_WEEK = 4	#星期5
+GEN_HOUR = 7	#早上7点
+
+g_Version = ""
 g_Progress = {}
 g_Bugs = {}
 g_AnalysisCount = 0
 
 def SaveProgress():	#保存进度
-	global g_Progress
-	s = ""
+	global g_Progress,g_Version
+	s = "Version: %s\n\n"%g_Version
 	for srvid, lineno in g_Progress.iteritems():
 		s += "%d : %d\n"%(srvid, lineno)
 	fp = open(LOCAL_PATH+PROGRESS_FILE, "w")
@@ -31,12 +37,17 @@ def SaveProgress():	#保存进度
 	return 0
 
 def LoadProgress():
-	global g_Progress
+	global g_Progress, g_Version
 	try:
 		fp = open(LOCAL_PATH+PROGRESS_FILE)
 	except:
 		return
 	for s in fp.readlines():
+		if s == "\n":
+			continue
+		if s[:7] == "Version":
+			g_Version = s[8:].strip()
+			continue
 		lst = s.split(":")
 		if len(lst) != 2:
 			return -1
@@ -97,7 +108,8 @@ def LoadBugs():
 
 def CopyLogFile():
 	for f in os.listdir(REMOTE_PATH):
-		if f.find("Log_yj") == 0:
+		#if f.find("Log_yj") == 0:
+		if f.find("Log_tht") == 0:
 			print "copyfile... %s"%f
 			shutil.copy(REMOTE_PATH+f, LOCAL_PATH)
 
@@ -106,10 +118,12 @@ def AnalysisFile():
 	file_modify = False
 	bug_modify = False
 	for f in os.listdir(LOCAL_PATH):
-		if f[0:6] != "Log_yj":
+		#name = "Log_yj"
+		name = "Log_tht"
+		if f[0:len(name)] != name:
 			continue
 		print "analysis... %s"%f
-		srvid = int(f[6:10])
+		srvid = int(f[len(name):len(name)+4])
 		lastline = g_Progress.get(srvid, 0)
 		fp = open(LOCAL_PATH+f)
 		bug = ""
@@ -142,22 +156,41 @@ def AnalysisFile():
 	return file_modify, bug_modify
 
 def DoAnalysis():
-	global g_AnalysisCount
+	global g_AnalysisCount, g_Version
+	newv = GetTimeVersion()
+	v_chang = g_Version != newv
+	if v_chang:
+		g_Version = newv
 	g_AnalysisCount += 1
 	print "The %dst Analysis Start! Time: %s"%(g_AnalysisCount, time.asctime())
 	CopyLogFile()
 	file_modify, bug_modify = AnalysisFile()
 	if bug_modify:
 		SaveBugs()
-	if file_modify:
+	if file_modify or v_chang:
 		SaveProgress()
 	nexttm = time.ctime(time.time() + ANALYSIS_INTERVAL)
 	print "The %dst Analysis Complete! Next Time: %s\n"%(g_AnalysisCount, nexttm)
 	time.sleep(ANALYSIS_INTERVAL)
 	DoAnalysis()
 
+def GetTimeVersion():
+	now = datetime.datetime.today()
+	w = time.localtime().tm_wday
+	h = time.localtime().tm_hour
+	if w >= GEN_WEEK and h >= GEN_HOUR:
+		day = w-GEN_WEEK
+	else:
+		day = w-GEN_WEEK+7
+	_day = datetime.timedelta(days=day)
+	d = (now-_day).replace(hour=GEN_HOUR).replace(minute=0).replace(second=0)
+	return d.strftime("%Y-%m-%d %H:%M:%S")
+
 def main():
+	print GetTimeVersion()
 	LoadProgress()
+	print g_Progress
+	print g_Version
 	LoadBugs()
 	DoAnalysis()
 	

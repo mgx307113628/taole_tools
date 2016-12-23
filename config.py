@@ -8,8 +8,9 @@ GENFILE_PATH = "E:/tools/genfiletags.sh"
 PATH_ROOT = "E:/yujian/"
 
 MAKEPY_DIRS = [
-	["御剑策划",	"E:/yujian/a导表/策划导表",	"E:/yujian/ready/",],
-	["御剑体服",	"E:/yujian/a导表/体服导表",	"E:/yujian/trunk/",],
+	["桃花2策划",	"E:/yujian/a导表/策划导表360",	"E:/yujian/ready/",],
+	["桃花2体服",	"E:/yujian/a导表/体服导表",	"E:/yujian/trunk/",],
+	["桃花2全服",	"E:/yujian/a导表/体服导表360",	"E:/yujian/script_360/",],
 	["御剑全服",	"E:/yujian/a导表/全服导表",	"E:/yujian/trial/",],
 	["手游策划",	"E:/pisces/策划导表",		"",],
 	["手游体服",	"E:/pisces/策划体服",		"",],

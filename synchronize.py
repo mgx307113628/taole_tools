@@ -6,7 +6,7 @@ import shutil
 import os.path
 import traceback
 import msvcrt
-import filenames
+#import filenames
 import filetags
 from config import *
 from functions import *
@@ -34,7 +34,7 @@ def Synchronize():
 	#目标目录条件
 	for dst in dests:
 		dname = GetDirName(dst)
-		if dname in ["ready", "trunk", "trial"]:
+		if dname in ["ready", "trunk", "trial", "script_360"]:
 			print "%s can't be dest"%dname
 			msvcrt.getch()
 			return
@@ -82,7 +82,7 @@ def Synchronize():
 			success.add(dst)
 	
 	#tags文件
-	filenames.GenerateFileTags(success)
+	#filenames.GenerateFileTags(success)
 	filetags.DoGenTags(success)
 	
 	print "================================================================"
