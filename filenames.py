@@ -1,5 +1,8 @@
 #coding:cp936
 
+#本模块已不再使用
+#调用GENFILE_PATH(genfiletags)
+
 import os
 import os.path
 import msvcrt
