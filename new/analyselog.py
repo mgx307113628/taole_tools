@@ -4,12 +4,11 @@ import os
 import shutil
 import time
 import datetime
-import json
-
 
 
 BUG_TYPE_ERROR = 1
 BUG_TYPE_TRACE = 2
+
 
 def GetTimeVersion():
     GEN_WEEK = 4#星期5
@@ -38,8 +37,7 @@ class Bug(object):
         self.Appearances.setdefault(errstr, {}).setdefault(srvid, []).append(linenum)
 
 class LogAnalyseTaohua2(object):
-    #REMOTE_LOG_DIR = "\\\\192.168.1.26\\guest\\th2log\\"
-    REMOTE_LOG_DIR = "/home/shangrila/code/taole_tools/new/"
+    REMOTE_LOG_DIR = "\\\\192.168.1.26\\guest\\th2log\\"
     LOG_FILE_HEAD = "Log_tht"
     REPORT_FILE_FORMAT = "bugreport_%s.txt"
     LOG_LINE_HEAD_NUM = 17
@@ -119,6 +117,11 @@ class LogAnalyseTaohua2(object):
             linenum = 0
             for line in open(self.LogDir+f):
                 linenum += 1
+                if linenum == 1:#[08-24
+                    month, day = self.TimeStr[4:6], self.TimeStr[6:8]
+                    if line[1:3] != month or line[4:6] != day:
+                        print srvid
+                        continue
                 #check error
                 text = line[self.LOG_LINE_HEAD_NUM:]
                 if len(errlines)==0:
@@ -140,8 +143,12 @@ class LogAnalyseTaohua2(object):
                         tracelines = []
 
     def ReadReport(self):
+        try:
+            f = open(self.ReportFile)
+        except:
+            return
         bug = None
-        for line in open(self.ReportFile):
+        for line in 
             if line[:3] == "BUG":
                 if bug != None:
                     print "read report error 1 !"
@@ -169,23 +176,24 @@ class LogAnalyseTaohua2(object):
         self.MaxBugID = max(self.Bugs)
 
     def WriteReport(self):
+        sepline = "#"*80+"\n"
         f = open(self.ReportFile, "w")
-        for bugid in sorted(self.Errors.values()):
+        for bugid in sorted(self.Errors.values())+sorted(self.Traces.values())::
             bug = self.Bugs[bugid]
+            if bug.Resolved == True:
+                continue
             f.write("BUG(%d) %d : %s"%(bug.BugType, bugid, bug.Mark))
             f.write("RESOLVED : %s\n"%(bug.Resolved))
-            f.write("#################################################################\n")
+            f.write(sepline)
             for errstr, dct in bug.Appearances.iteritems():
                 for srvid, linenums in dct.iteritems():
                     f.write("SERVER %d : %s\n"%(srvid, str(linenums)))
                 f.write("%s"%errstr)
-            f.write("#################################################################\n\n")
+            f.write(sepline)
 
 
 def main():
     LOCAL_PATH = "E:/log/"
-    #print "logdir:",logdir
-    LOCAL_PATH = "/home/shangrila/code/taole_tools/new/"
     analysor = LogAnalyseTaohua2(LOCAL_PATH, LOCAL_PATH)
     analysor.StartAnalyse()
 
