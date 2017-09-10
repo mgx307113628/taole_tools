@@ -116,11 +116,13 @@ class LogAnalyseTaohua2(object):
             tracelines = []
             linenum = 0
             for line in open(self.LogDir+f):
+                print "analyse file... %s"%f
                 linenum += 1
-                if linenum == 1:#[08-24
+                if linenum == 1:
+                    #check log file firstline
+                    #[09-08 07:41.22] 游戏服务器启动，最大连接数为10240
                     month, day = self.TimeStr[4:6], self.TimeStr[6:8]
                     if line[1:3] != month or line[4:6] != day:
-                        print srvid
                         continue
                 #check error
                 text = line[self.LOG_LINE_HEAD_NUM:]
