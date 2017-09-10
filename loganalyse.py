@@ -192,7 +192,7 @@ class LogAnalyseTaohua2(object):
                 for srvid, linenums in dct.iteritems():
                     f.write("SERVER %d : %s\n"%(srvid, str(linenums)))
                 f.write("%s"%errstr)
-            f.write(sepline)
+                f.write(sepline)
             f.write("\n")
         f.close()
 
