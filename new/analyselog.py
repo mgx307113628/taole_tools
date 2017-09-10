@@ -174,28 +174,28 @@ class LogAnalyseTaohua2(object):
                     self.Traces[bug.Mark] = bug.ID
                 bug = None
         self.MaxBugID = max(self.Bugs)
+        f.close()
 
     def WriteReport(self):
         sepline = "#"*80+"\n"
         f = open(self.ReportFile, "w")
-        for bugid in sorted(self.Errors.values())+sorted(self.Traces.values())::
-            bug = self.Bugs[bugid]
+        bugs = sorted(self.Bugs.values(), key=lambda x:(x.Resolved, x.BugType, x.ID))
+        for bug in bugs:
+            f.write("BUG(%d) %d : %s"%(bug.BugType, bug.ID, bug.Mark))
+            f.write("RESOLVED : %s\n"%(bug.Resolved))
             if bug.Resolved == True:
                 continue
-            f.write("BUG(%d) %d : %s"%(bug.BugType, bugid, bug.Mark))
-            f.write("RESOLVED : %s\n"%(bug.Resolved))
             f.write(sepline)
             for errstr, dct in bug.Appearances.iteritems():
                 for srvid, linenums in dct.iteritems():
                     f.write("SERVER %d : %s\n"%(srvid, str(linenums)))
                 f.write("%s"%errstr)
             f.write(sepline)
+            f.write("\n")
+        f.close()
 
 
-def main():
+if __name__ == "__main__":
     LOCAL_PATH = "E:/log/"
     analysor = LogAnalyseTaohua2(LOCAL_PATH, LOCAL_PATH)
     analysor.StartAnalyse()
-
-if __name__ == "__main__":
-    main()
