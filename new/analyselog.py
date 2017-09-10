@@ -148,7 +148,7 @@ class LogAnalyseTaohua2(object):
         except:
             return
         bug = None
-        for line in 
+        for line in f:
             if line[:3] == "BUG":
                 if bug != None:
                     print "read report error 1 !"
