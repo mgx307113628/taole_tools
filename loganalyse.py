@@ -123,7 +123,7 @@ class LogAnalyseTaohua2(object):
                     month, day = self.TimeStr[4:6], self.TimeStr[6:8]
                     if line[1:3] != month or line[4:6] != day:
                         continue
-                print "analyse file... %s"%f
+                    print "analyse file... %s"%f
                 #check error
                 text = line[self.LOG_LINE_HEAD_NUM:]
                 if len(errlines)==0:
