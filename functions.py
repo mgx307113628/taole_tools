@@ -23,8 +23,12 @@ def ReadInputDirs(hint="", root=PATH_ROOT, maxnum=None):
 					break
 				if s[0] in ["c","d","e","f","g","C","D","E","F","G",] and s[1] == ":" and s[2] in ["\\", "/"]:
 					_path = s+"/"
+				elif s in MASTER_DIRS:
+					_path = root+"master/"+s+"/"
+				elif s in PUBLIC_DIRS:
+					_path = root+"public/"+s+"/"
 				else:
-					_path = root+s+"/"
+					_path = root+"branch/"+s+"/"
 				if not os.path.isdir(_path):
 					fail = True
 					print "ERROR, No Such Directory: %s !!!"%_path

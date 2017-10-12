@@ -20,43 +20,42 @@ class MakePyException(Exception):
 
 
 def main():
-	print "御剑自动导表:"
-	lst = []
+	print "桃花2自动导表:"
+	options = {}
+	notify = []
 	for i, d in enumerate(MAKEPY_DIRS):
-		if d[2] != "":
-			lst.append("%d.%s"%(i+1, d[0]))
-	hint = "\t".join(lst)+"\nChose Work Directory: "
+		name, _, dest = d
+		if dest:
+			options[i] = d
+			notify.append("%d.%s"%(i, name))
+	hint = "\t".join(notify)+"\nChose Work Directory: "
 	while True:
 		input_s = raw_input(hint)
 		input_s = input_s.strip()
 		if input_s == "exit" or input_s == "quit":
 			return
-		if len(input_s) > len(MAKEPY_DIRS):
+		if len(input_s) > len(options):
 			print "Wrong input!!!!!"
 			continue
 		idxes = []
-		wrong = False
-		for i in input_s:
-			try:
+		try:
+			for i in input_s:
 				idx = int(i)
-			except:
-				print "Wrong input!!!!!"
-				wrong = True
-				break
-			if idx > len(MAKEPY_DIRS) or idx <= 0 or MAKEPY_DIRS[idx-1][2] == "":
-				print "Wrong input!!!!!"
-				wrong = True
-				break
-			if idx not in idxes:
-				idxes.append(idx)
-		if not wrong:
-			break
+				if idx not in options:
+					raise
+				if idx not in idxes:
+					idxes.append(idx)
+		except:
+			print "Wrong input !!!!!"
+			continue
+		break
 	
 	errors = {}
 	for idx in idxes:
-		name, workdir, dst = MAKEPY_DIRS[idx-1]
+		name, workdir, dst = options[idx]
 		try:
 			DoDaoBiao(workdir, dst)
+			print "============> SUCCESS : %s -> %s\n"%(workdir, dst)
 		except SVNException, e:
 			errors.setdefault(name, []).append(e.m_ErrMsg)
 		except MakePyException, e:
@@ -79,7 +78,7 @@ def main():
 			errors.setdefault(name, []).append(traceback.format_exc())
 
 	for idx in idxes:
-		name, workdir, dst = MAKEPY_DIRS[idx-1]
+		name, workdir, dst = options[idx]
 		print "==================================================="
 		print name+" RESULT:\n"
 		msglst = errors.get(name)

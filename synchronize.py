@@ -14,10 +14,16 @@ from functions import *
 
 def Synchronize():
 	#源目录
-	dset = ReadInputDirs("Synchronize Code\nChose Source Dir: ", maxnum=1)
-	if dset is None:
+	sset = ReadInputDirs("Synchronize Code\nChose Source Dir: ", maxnum=1)
+	if sset is None:
 		return
-	source = list(dset)[0]
+	#目标目录
+	dests = ReadInputDirs("Enter Dest Dirs: ")
+	if dests is None:
+		return
+	
+	#检查源目录
+	source = list(sset)[0]
 	srcname = GetDirName(source)
 	print "check %s SVN ..."%source
 	SVNUpdate(source)
@@ -27,14 +33,10 @@ def Synchronize():
 		return
 	rev = SVNRevision(source)
 	
-	#目标目录
-	dests = ReadInputDirs("Enter Dest Dirs: ")
-	if dests is None:
-		return
 	#目标目录条件
 	for dst in dests:
 		dname = GetDirName(dst)
-		if dname in ["ready", "trunk", "trial", "script_360"]:
+		if dname in MASTER_DIRS + PUBLIC_DIRS:
 			print "%s can't be dest"%dname
 			msvcrt.getch()
 			return
