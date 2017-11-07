@@ -5,35 +5,23 @@ import os
 import os.path
 import traceback
 import msvcrt
+import subprocess
+import datetime
 from config import *
 from functions import *
 
-class SVNException(Exception):  
-	def __init__(self, errmsg):  
-		Exception.__init__(self)
-		self.m_ErrMsg = errmsg
 
-class MakePyException(Exception):  
-	def __init__(self, errmsg):  
-		Exception.__init__(self)
-		self.m_ErrMsg = errmsg
-
-
-def main():
-	print "桃花2自动导表:"
-	options = {}
-	notify = []
-	for i, d in enumerate(MAKEPY_DIRS):
-		name, _, dest = d
-		if dest:
-			options[i] = d
-			notify.append("%d.%s"%(i, name))
-	hint = "\t".join(notify)+"\nChose Work Directory: "
+def GetChoise(hint, options):
 	while True:
-		input_s = raw_input(hint)
+		try:
+			input_s = raw_input(hint)
+		except KeyboardInterrupt:
+			continue
 		input_s = input_s.strip()
 		if input_s == "exit" or input_s == "quit":
-			return
+			exit(0)
+		if len(input_s) == 0:
+			continue
 		if len(input_s) > len(options):
 			print "Wrong input!!!!!"
 			continue
@@ -48,85 +36,37 @@ def main():
 		except:
 			print "Wrong input !!!!!"
 			continue
-		break
+		return idxes
+
+def DaoBiao():
+	options = {}
+	notify = []
+	for i, d in enumerate(MAKEPY_DIRS):
+		name, _, dest = d
+		if dest:
+			options[i] = d
+			notify.append("%d.%s"%(i, name))
+	hint = "\n桃花2自动导表:\t"+"\t".join(notify)+"\nChose Work Directory: "
+	idxes = GetChoise(hint, options)
 	
-	errors = {}
-	for idx in idxes:
-		name, workdir, dst = options[idx]
+	print "="*79
+	#t = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+	t = datetime.datetime.now().strftime('%m月%d日%H时%M分')
+	for name, workdir, dst in [options[idx] for idx in idxes]:
+		si = subprocess.STARTUPINFO()
+		si.dwFlags = subprocess.STARTF_USESHOWWINDOW
+		si.wShowWindow = 4
 		try:
-			DoDaoBiao(workdir, dst)
-			print "============> SUCCESS : %s -> %s\n"%(workdir, dst)
-		except SVNException, e:
-			errors.setdefault(name, []).append(e.m_ErrMsg)
-		except MakePyException, e:
-			errors.setdefault(name, []).append(e.m_ErrMsg)
-			clst,alst,rlst,dlst,mlst = SVNStatus(dst)
-			rvts = rlst+dlst+mlst
-			if rvts and SVNRevert(rvts) != 0:
-				errors[name].append("%s Revert ERROR !!!"%dst)
-				continue
-			try:
-				for f in alst:
-					os.remove(f)
-			except:
-				errors[name].append("%s Revert NOT Clear !!!"%dst)
-				continue
-			if SVNIsModified(dst):
-				errors[name].append("%s Revert NOT Clear !!!"%dst)
-				continue
+			child = subprocess.Popen(["python", os.getcwd()+"\\submake.py", name, workdir, dst], cwd=workdir, creationflags=subprocess.CREATE_NEW_CONSOLE, startupinfo=si)
 		except:
-			errors.setdefault(name, []).append(traceback.format_exc())
+			traceback.print_exc()
+		print "%s  %s  %s=>%s"%(name, t, workdir, dst)
+	print "="*79
+	return True
 
-	for idx in idxes:
-		name, workdir, dst = options[idx]
-		print "==================================================="
-		print name+" RESULT:\n"
-		msglst = errors.get(name)
-		if msglst:
-			for msg in msglst:
-				print msg+"\n"
-		else:
-			print "SUCCESS : %s -> %s\n"%(workdir, dst)
-	
-	msvcrt.getch()
-
-def DoDaoBiao(workdir, dst):
-	os.chdir(workdir)
-	SVNUpdate(workdir)
-	clst,alst,rlst,dlst,mlst = SVNStatus(workdir)
-	rvts = clst+rlst+dlst+mlst
-	if rvts:
-		raise SVNException("%s NOT Equal Repository !!!"%workdir)
-	#if rvts and SVNRevert(rvts) != 0:
-	#	raise SVNException("%s revert error !!!"%workdir)
-	
-	SVNUpdate(dst)
-	if SVNIsModified(dst):
-		raise SVNException("%s NOT Equal Repository !!!"%dst)
-	
-	f = open("config.ini", "w")
-	f.write("script_path=%s"%dst)
-	f.close()
-	
-	print "%s --> %s......"%(workdir, dst)
-	
-	sys.path.append(workdir)
-	import makepyfile
-	reload(makepyfile)
-	savedstd = sys.stdout
-	tmp = open("e:/temp/tmp.txt", "w")
-	sys.stdout = tmp
-	try:
-		makepyfile.MakePyfile("server")
-	except:
-		raise MakePyException(traceback.format_exc())
-	finally:
-		sys.stdout = savedstd
-		sys.path.remove(workdir)
-	
-	if SVNCommitAll(dst, "导表") != 0:
-		raise SVNException("%s Commit ERROR !!!"%dst)
-	
+def main():
+	while True:
+		DaoBiao()
 
 if __name__ == "__main__":
 	main()

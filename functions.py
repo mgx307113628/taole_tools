@@ -112,11 +112,20 @@ def SVNRevert(files):
 	return 0
 
 def SVNRevertAll(d):
-	clst,alst,rlst,dlst,mlst = SVNStatus(workdir)
+	clst,alst,rlst,dlst,mlst = SVNStatus(d)
 	rvts = clst+rlst+dlst+mlst
 	if rvts and SVNRevert(rvts) != 0:
-		print "%s revert error !!!"%workdir
-		return
+		print "%s revert error !!!"%d
+		return 1
+	try:
+		for f in alst:
+			os.remove(f)
+	except:
+		pass
+	if SVNIsModified(d):
+		print "%s revert not clear !!!"%d
+		return 2
+	return 0
 
 def SVNCommit(d, log):
 	cmd = 'svn ci %s -m "%s"'%(d,log)

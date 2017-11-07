@@ -14,7 +14,7 @@ MAKEPY_DIRS = [
 	["策划",	"E:/taohua2/导表/1策划",	"E:/taohua2/master/ready/",],
 	["体服",	"E:/taohua2/导表/2体服",	"E:/taohua2/master/trunk/",],
 	["全服",	"E:/taohua2/导表/3全服",	"E:/taohua2/master/violet/",],
-	["御剑",	"E:/taohua2/导表/4御剑",	"E:/taohua2/master/yujian/",],
+	["御剑",	"E:/taohua2/导表/4御剑",	"",],#E:/taohua2/master/yujian/
 	["手游策划",	"E:/pisces/策划导表",	"",],
 	["手游体服",	"E:/pisces/策划体服",	"",],
 ]
