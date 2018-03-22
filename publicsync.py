@@ -26,7 +26,7 @@ def Synchronize():
 	source = list(sset)[0]
 	srcname = GetDirName(source)
 	print "check %s SVN ..."%source
-	#SVNUpdate(source)
+	SVNUpdate(source)
 	if SVNIsModified(source):
 		print "%s NOT Equal Repository !!!"%source
 		msvcrt.getch()
@@ -41,7 +41,7 @@ def Synchronize():
 		msvcrt.getch()
 		return
 	print "check %s SVN ..."%dst
-	#SVNUpdate(dst)
+	SVNUpdate(dst)
 	if SVNIsModified(dst):
 		print "%s NOT Equal Repository !!!"%dst
 		msvcrt.getch()

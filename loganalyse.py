@@ -4,6 +4,7 @@ import os
 import shutil
 import time
 import datetime
+import msvcrt
 
 
 BUG_TYPE_ERROR = 1
@@ -71,10 +72,15 @@ class LogAnalyseTaohua2(object):
         return 0
 
     def CopyLogFiles(self):
+        flst = os.listdir(self.REMOTE_LOG_DIR)
+        if not flst:
+            print "NO REMOTE LOG FILES !!"
+            msvcrt.getch()
+            exit(1)
         if os.path.exists(self.LogDir):
             shutil.rmtree(self.LogDir)
         os.mkdir(self.LogDir)
-        for f in os.listdir(self.REMOTE_LOG_DIR):
+        for f in flst:
             if self.CheckLogName(f) != 0:
                 print "copyfile... %s"%f
                 shutil.copy(self.REMOTE_LOG_DIR+f, self.LogDir)
@@ -175,7 +181,8 @@ class LogAnalyseTaohua2(object):
                 elif bug.BugType == BUG_TYPE_TRACE:
                     self.Traces[bug.Mark] = bug.ID
                 bug = None
-        self.MaxBugID = max(self.Bugs)
+        if self.Bugs:
+            self.MaxBugID = max(self.Bugs)
         f.close()
 
     def WriteReport(self):
