@@ -205,6 +205,6 @@ class LogAnalyseTaohua2(object):
 
 
 if __name__ == "__main__":
-    LOCAL_PATH = "E:/log/"
+    LOCAL_PATH = "E:/log/runlog/"
     analysor = LogAnalyseTaohua2(LOCAL_PATH, LOCAL_PATH)
     analysor.StartAnalyse()
