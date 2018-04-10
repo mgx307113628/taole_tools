@@ -1,17 +1,24 @@
 #coding:cp936
 
+import sys
 import os
+import re
 import shutil
 import time
 import datetime
-import re
+import optparse
+import traceback
+
+
+def log_message(msg, *args):
+    print >> sys.stdout, "[%s] %s"%(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), msg%args)
+    sys.stdout.flush()
 
 class NameList(list):
     def __init__(self, name, unit):
         list.__init__([])
         self.name = name
         self.unit = unit
-
 
 class Analysor(object):
     pattern_time = re.compile(r"^\[(\d{4})-(\d{2})-(\d{2}).*")
@@ -20,9 +27,12 @@ class Analysor(object):
     pattern_studio = re.compile(r"^\[.{19}\] STUDIOMONEY who:(\d+) total:(\d+) money:(\d+) studio:(\d+) .*")
     pattern_forbid = re.compile(r"^\[.{19}\] STUDIOFORBID who:(\d+) .*studio:(\d+) .*")
 
-    def __init__(self, srvid, logfile, reportdir):
+    def __init__(self, srvid, logfile, archivedir, reportdir):
         self.serverid = srvid
         self.logfile = logfile
+        self.archivedir = os.path.join(archivedir, str(srvid))
+        if not os.path.exists(self.archivedir):
+            os.mkdir(self.archivedir)
         self.reportdir = reportdir
 
         self.logtime = ""
@@ -36,8 +46,8 @@ class Analysor(object):
         self.rank_money_give = NameList('支出总金额', '银子')
         self.rank_money_givecnt = NameList('支出总次数', '次数')
         self.rank_money_total = NameList('交易总金额(收入+支出)', '银子')
-        self.rank_studio_recvcnt = NameList('"低于12小时银子"收入总次数', '次数')
-        self.rank_studio_givecnt = NameList('"低于12小时银子"支出总次数', '次数')
+        self.rank_studio_recvcnt = NameList('"低于12小时玩家银子"收入总次数', '次数')
+        self.rank_studio_givecnt = NameList('"低于12小时玩家银子"支出总次数', '次数')
         self.rank_forbid = NameList('被拦截交易次数', '次数')
 
         self.all_rank = [
@@ -62,21 +72,17 @@ class Analysor(object):
         for line in open(self.logfile):
             m = self.pattern_time.match(line)
             if m:
-                print "Analysis logfile... server:", self.serverid, "time:", m.groups()
+                log_message("Analysis logfile... server: %s, time: %s-%s-%s", self.serverid, *m.groups())
                 break
         else:
             raise RunTimeError
         self.logtime = "%s%s%s"%m.groups()
-        #arcdir = self.archive + str(srvid) + "/"
-        #if not os.path.exists(arcdir):
-        #    os.mkdir(arcdir)
-        #shutil.copy(localfile, arcdir+"r_moneymonitor_%s_%s_%s.log"%m.groups())
+        shutil.copy(self.logfile, os.path.join(self.archivedir, "r_moneymonitor_%s_%s_%s.log"%m.groups()))
 
     def GatherStatistics(self):
         for line in open(self.logfile):
             match_trade = self.pattern_trade.match(line)
             if match_trade:
-                #print match_trade.groups()
                 _, recver, recv_money, giver, give_money = match_trade.groups()
                 recver      =int(recver)
                 recv_money  =int(recv_money)
@@ -110,7 +116,7 @@ class Analysor(object):
                     self.data_forbid[pid] = self.data_forbid.get(pid, 0) + 1
 
     def Rank(self):
-        print "Work Done! Analysis trade %d players"%(len(self.data_trade))
+        log_message("Work Done! Analysis trade %d players"%(len(self.data_trade)))
         for pid, [recv_cnt, recv_money, give_cnt, give_money] in self.data_trade.iteritems():
             if recv_cnt > 0:
                 self.rank_money_recvcnt.append((recv_cnt, pid))
@@ -136,7 +142,7 @@ class Analysor(object):
             rank.sort(reverse=True)
 
     def WriteReport(self):
-        f = open(self.reportdir+"report_%d_%s.txt"%(self.serverid, self.logtime), "w")
+        f = open(os.path.join(self.reportdir, "report_%s_%d.txt"%(self.logtime, self.serverid)), "w")
         for rank in self.all_rank:
             rank.sort(reverse=True)
             f.write('====%s====\r\n'%(rank.name))
@@ -155,33 +161,28 @@ class Manager(object):
     LOG_FILE_NAME = "r_moneymonitor.log"
     REPORT_FILE_FORMAT = "moneyreport_%s.txt"
 
-
-    
-
-    def __init__(self, root=None):
-        #self.TimeStr = GetTimeVersion()
-        
-        if root is None:
-            self.root = os.getcwd()+"/"
-        else:
-            self.root = root
-        self.logdir = self.root+"log/"
-        #self.archive = self.root+"archieve/"
+    def __init__(self, logdir, outdir, archdir):
+        self.logdir = logdir
+        self.outdir = outdir
+        self.archive = archdir
         self.analysors = {}
         
 
     def StartAnalyse(self):
-        self.CopyLogFiles()
-        for srvid, analysor in self.analysors.iteritems():
-            try:
-                analysor.Analysis()
-            except:
-                print "server%d log run error !!"%srvid
+        while True:
+            self.CopyLogFiles()
+            for srvid, analysor in self.analysors.iteritems():
+                try:
+                    analysor.Analysis()
+                except:
+                    log_message("server%d log run error !!\n%s"%(srvid, traceback.format_exc()))
+            log_message("sleeping....")
+            time.sleep(3600)
 
     def CopyLogFiles(self):
         dirlst = os.listdir(self.REMOTE_LOG_DIR)
         if not dirlst:
-            print "NO REMOTE LOG FILES !!"
+            log_message("NO REMOTE LOG FILES !!")
             #msvcrt.getch()
             exit(1)
         allsrvlst = []
@@ -193,7 +194,7 @@ class Manager(object):
                     pass
         serverids = sorted(allsrvlst, reverse=True)[:20]
         if len(serverids) == 0:
-            print "NO REMOTE LOG FILES !!"
+            log_message("NO REMOTE LOG FILES !!")
             #msvcrt.getch()
             exit(1)
         if os.path.exists(self.logdir):
@@ -201,14 +202,47 @@ class Manager(object):
         os.mkdir(self.logdir)
         for srvid in serverids:
             remotefile = self.REMOTE_LOG_DIR+self.LOG_DIR_HEAD+str(srvid)+"/"+self.LOG_FILE_NAME
-            localdir = self.logdir + str(srvid) + "/"
+            localdir = os.path.join(self.logdir, str(srvid))
             os.mkdir(localdir)
-            localfile = localdir+self.LOG_FILE_NAME
-            print "copyfile... %s to %s"%(remotefile, localfile)
+            localfile = os.path.join(localdir, self.LOG_FILE_NAME)
+            log_message("copyfile... %s to %s"%(remotefile, localfile))
             shutil.copy(remotefile, localfile)
-            self.analysors[srvid] = Analysor(srvid, localfile, self.root)
+            self.analysors[srvid] = Analysor(srvid, localfile, self.archive, self.outdir)
 
+
+def main():
+    root = os.path.split(os.path.abspath(__file__))[0]
+    
+    parser = optparse.OptionParser(usage = '%prog [--outdir=outdir]', version='%prog 0.1' )
+    parser.add_option('-o', '--outdir', dest='out', type=str, default='', help='output directory', metavar='outdir')
+    parser.add_option('-a', '--archdir', dest='arch', type=str, default='', help='archive directory', metavar='archdir')
+    opts, args = parser.parse_args()
+    
+    if opts.out:
+        out_dir = os.path.abspath(opts.out)
+        if not os.path.isdir(out_dir):
+            log_message("ERROR! not this dir:%s"%out_dir)
+            return
+    else:
+        out_dir = os.getcwd()
+
+    if opts.arch:
+        arch_dir = os.path.abspath(opts.arch)
+        if not os.path.isdir(arch_dir):
+            log_message("ERROR! not this dir:%s"%arch_dir)
+            return
+    else:
+        arch_dir = os.path.join(root, "archievelog")
+        if not os.path.exists(arch_dir):
+            os.mkdir(arch_dir)
+    
+    log_dir = os.path.join(root, "currentlog")
+    if not os.path.exists(log_dir):
+        os.mkdir(log_dir)
+    
+    log_message("Start ! log:%s arch:%s out:%s"%(log_dir, arch_dir, out_dir))
+    analysor = Manager(log_dir, out_dir, arch_dir)
+    analysor.StartAnalyse()
 
 if __name__ == "__main__":
-    analysor = Manager()
-    analysor.StartAnalyse()
+    main()
